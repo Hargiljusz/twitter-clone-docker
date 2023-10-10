@@ -1,0 +1,93 @@
+version: '3.8'
+services:
+  mongo_01:
+   image: mongo
+   restart: always
+   container_name: mongo_01
+   volumes:
+    - mongo-01-volume:/data/db
+    - ./setup-rs.js:/scripts/setup-rs.js
+    - ./setup-rs.sh:/scripts/setup-rs.sh
+   networks:
+    - mongo-claster
+    - rest_api_net
+    - graphql_net
+   ports:
+    - 27017:27017
+   entrypoint: [ "/usr/bin/mongod", "--replSet", "mrs","--bind_ip_all"]
+
+  mongo_02:
+   image: mongo
+   restart: always
+   container_name: mongo_02
+   volumes:
+    - mongo-02-volume:/data/db
+   networks:
+    - mongo-claster
+    - rest_api_net
+    - graphql_net
+   ports:
+    - 27018:27017
+   entrypoint: [ "/usr/bin/mongod", "--replSet", "mrs","--bind_ip_all"]    
+
+  mongo_03:
+   image: mongo
+   restart: always
+   container_name: mongo_03
+   volumes:
+    - mongo-03-volume:/data/db
+   networks:
+    - mongo-claster
+    - rest_api_net
+    - graphql_net
+   ports:
+    - 27019:27017
+   entrypoint: [ "/usr/bin/mongod", "--replSet", "mrs","--bind_ip_all"]
+
+  rest_api:
+   image: twitter_clone.rest_api
+   restart: always
+   environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+   networks:
+    - rest_api_net
+   ports:
+    - 5000:80
+   volumes:
+    - image-volme:/app/files
+
+  graphql:
+   image: twitter_clone.graphql
+   restart: always
+   environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+   networks:
+    - graphql_net
+   ports:
+    - 5001:80  
+   volumes:
+    - image-volme:/app/files
+
+
+networks:
+  mongo-claster:
+    name: mongo-claster
+  rest_api_net:
+    name: rest_api_net
+  graphql_net:
+    name: graphql_net 
+
+volumes:
+  mongo-01-volume:
+    name: mongo-01-volume
+    #external: true
+  mongo-02-volume:
+    name: mongo-02-volume
+    #external: true
+  mongo-03-volume:
+    name: mongo-03-volume  
+    #external: true 
+  image-volme:
+    name: image-volme 
+    #external: true
+  

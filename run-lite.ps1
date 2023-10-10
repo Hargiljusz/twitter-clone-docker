@@ -1,0 +1,1 @@
+docker-compose -f lite-docker-compose.yaml up -d
